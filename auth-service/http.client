@@ -1,0 +1,27 @@
+GET https://example.com/comments/1 HTTP/1.1
+
+###
+
+GET https://example.com/topics/1 HTTP/1.1
+
+###
+
+POST http://localhost:8080/api/register HTTP/1.1
+content-type: application/json
+
+{
+    "username": "sample3",
+    "password": "hello"
+}
+###
+POST http://localhost:8080/api/login HTTP/1.1
+content-type: application/json
+
+{
+    "username": "sample3",
+    "password": "hello"
+}
+###
+GET http://localhost:8080/api/admin/user HTTP/1.1
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NzI2ODEzNjEsInVzZXJfaWQiOjN9.BwAwsFlk-B4JsKNWmn1-LoQpvfstG0alz3rHnwLhoac
