@@ -19,6 +19,7 @@ type User struct {
 
 func (u *User) SaveUser() (*User, error) {
 
+	u.BeforeSave()
 	var err error
 	err = DB.Create(&u).Error
 	if err != nil {
