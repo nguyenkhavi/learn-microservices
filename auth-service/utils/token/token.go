@@ -12,21 +12,29 @@ import (
 )
 
 func GenerateToken(user_id uint) (string, error) {
-
-	token_lifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
-
+	token_lifespan, err := strconv.Atoi(os.Getenv("TOKEN_MIN_LIFESPAN"))
 	if err != nil {
 		return "", err
 	}
-
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = user_id
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(token_lifespan)).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * time.Duration(token_lifespan)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(os.Getenv("TOKEN_SECRET")))
+}
 
-	return token.SignedString([]byte(os.Getenv("API_SECRET")))
-
+func GenerateRefreshToken(user_id uint) (string, error) {
+	token_lifespan, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_DAY_LIFESPAN"))
+	if err != nil {
+		return "", err
+	}
+	claims := jwt.MapClaims{}
+	claims["authorized"] = true
+	claims["user_id"] = user_id
+	claims["exp"] = time.Now().Add(time.Hour * 24 * time.Duration(token_lifespan)).Unix()
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(os.Getenv("REFRESH_TOKEN_SECRET")))
 }
 
 func TokenValid(c *gin.Context) error {
@@ -35,7 +43,20 @@ func TokenValid(c *gin.Context) error {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("API_SECRET")), nil
+		return []byte(os.Getenv("TOKEN_SECRET")), nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func RefreshTokenValid(tokenString string) error {
+	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("REFRESH_TOKEN_SECRET")), nil
 	})
 	if err != nil {
 		return err
@@ -62,7 +83,29 @@ func ExtractTokenID(c *gin.Context) (uint, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("API_SECRET")), nil
+		return []byte(os.Getenv("TOKEN_SECRET")), nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["user_id"]), 10, 32)
+		if err != nil {
+			return 0, err
+		}
+		return uint(uid), nil
+	}
+	return 0, nil
+}
+
+func ExtractRefreshTokenID(tokenString string) (uint, error) {
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("REFRESH_TOKEN_SECRET")), nil
 	})
 	if err != nil {
 		return 0, err

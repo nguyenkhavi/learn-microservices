@@ -1,6 +1,7 @@
 package authControllers
 
 import (
+	"fmt"
 	"net/http"
 	"nkvi/auth-service/models"
 	"nkvi/auth-service/utils/token"
@@ -55,14 +56,14 @@ func Login(c *gin.Context) {
 	u.Username = input.Username
 	u.Password = input.Password
 
-	token, err := models.LoginCheck(u.Username, u.Password)
+	access_token, refresh_token, err := models.LoginCheck(u.Username, u.Password)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"accessToken": access_token, "refreshToken": refresh_token})
 
 }
 
@@ -83,4 +84,36 @@ func CurrentUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": u})
+}
+
+type RefreshTokenInput struct {
+	RefreshToken string `json:"refreshToken" binding:"required"`
+}
+
+func Refresh(c *gin.Context) {
+
+	var input RefreshTokenInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := token.RefreshTokenValid(input.RefreshToken); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var ID, err = token.ExtractRefreshTokenID(input.RefreshToken)
+	fmt.Printf("%d", ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	access_token, err := token.GenerateToken(ID)
+
+	refresh_token, err := token.GenerateRefreshToken(ID)
+
+	c.JSON(http.StatusOK, gin.H{"accessToken": access_token, "refreshToken": refresh_token})
 }

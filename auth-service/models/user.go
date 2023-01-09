@@ -47,7 +47,7 @@ func VerifyPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func LoginCheck(username string, password string) (string, error) {
+func LoginCheck(username string, password string) (string, string, error) {
 
 	var err error
 
@@ -56,22 +56,24 @@ func LoginCheck(username string, password string) (string, error) {
 	err = DB.Model(User{}).Where("username = ?", username).Take(&u).Error
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	err = VerifyPassword(password, u.Password)
 
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		return "", err
+		return "", "", err
 	}
 
-	token, err := token.GenerateToken(u.ID)
+	access_token, err := token.GenerateToken(u.ID)
+
+	refresh_token, err := token.GenerateRefreshToken(u.ID)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return token, nil
+	return access_token, refresh_token, nil
 
 }
 
