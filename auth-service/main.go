@@ -6,10 +6,15 @@ import (
 	authControllers "nkvi/auth-service/src/auth"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load(".env")
 
+	// if err != nil {
+	// 	log.Fatalf("Error loading .env file %s", err.Error())
+	// }
 	models.ConnectDataBase()
 
 	r := gin.Default()

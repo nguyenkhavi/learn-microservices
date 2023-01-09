@@ -10,7 +10,7 @@ POST http://localhost:8080/api/register HTTP/1.1
 content-type: application/json
 
 {
-    "username": "sample3@gmail.com",
+    "username": "sample323wws@gmail.com",
     "password": "hello"
 }
 ###
@@ -18,8 +18,17 @@ POST http://localhost:8080/api/login HTTP/1.1
 content-type: application/json
 
 {
-    "username": "sample3@gmail.com",
+    "username": "sample323wws@gmail.com",
     "password": "hello"
+}
+
+###
+
+POST http://localhost:8080/api/refresh-token HTTP/1.1
+content-type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NzU4NDM5MzYsInVzZXJfaWQiOjE2fQ.eoyOZAFAo-elb_iYG5S2lGR9qVhjxcwW8UceevN51Lc"
 }
 ###
 GET http://localhost:8080/api/admin/user HTTP/1.1
