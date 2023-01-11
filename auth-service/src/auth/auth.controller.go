@@ -1,7 +1,6 @@
 package authControllers
 
 import (
-	"fmt"
 	"net/http"
 	"nkvi/auth-service/models"
 	"nkvi/auth-service/utils/token"
@@ -104,16 +103,11 @@ func Refresh(c *gin.Context) {
 		return
 	}
 
-	var ID, err = token.ExtractRefreshTokenID(input.RefreshToken)
-	fmt.Printf("%d", ID)
+	accessToken, refreshToken, err := models.RefreshToken(input.RefreshToken)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	access_token, err := token.GenerateToken(ID)
-
-	refresh_token, err := token.GenerateRefreshToken(ID)
-
-	c.JSON(http.StatusOK, gin.H{"accessToken": access_token, "refreshToken": refresh_token})
+	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken, "refreshToken": refreshToken})
 }

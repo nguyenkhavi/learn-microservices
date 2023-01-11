@@ -1,8 +1,10 @@
 package main
 
 import (
+	"log"
 	"nkvi/auth-service/middlewares"
 	"nkvi/auth-service/models"
+
 	authControllers "nkvi/auth-service/src/auth"
 
 	"github.com/gin-gonic/gin"
@@ -10,13 +12,12 @@ import (
 )
 
 func main() {
-	godotenv.Load(".env")
+	err := godotenv.Load(".env")
 
-	// if err != nil {
-	// 	log.Fatalf("Error loading .env file %s", err.Error())
-	// }
-	models.ConnectDataBase()
-
+	if err != nil {
+		log.Fatalf("Error loading .env file %s", err.Error())
+	}
+	models.Init()
 	r := gin.Default()
 
 	public := r.Group("/api")

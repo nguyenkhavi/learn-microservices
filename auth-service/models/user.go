@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"html"
 	"strings"
 
@@ -20,7 +21,7 @@ type User struct {
 func (u *User) SaveUser() (*User, error) {
 
 	var err error
-	err = DB.Create(&u).Error
+	err = GetDB().Create(&u).Error
 	if err != nil {
 		return &User{}, err
 	}
@@ -52,8 +53,7 @@ func LoginCheck(username string, password string) (string, string, error) {
 	var err error
 
 	u := User{}
-
-	err = DB.Model(User{}).Where("username = ?", username).Take(&u).Error
+	err = GetDB().Model(User{}).Where("username = ?", username).Take(&u).Error
 
 	if err != nil {
 		return "", "", err
@@ -73,6 +73,13 @@ func LoginCheck(username string, password string) (string, string, error) {
 		return "", "", err
 	}
 
+	ut := UserToken{UserId: u.ID, Token: refresh_token}
+	err = ut.SaveUserToken()
+
+	if err != nil {
+		return "", "", err
+	}
+
 	return access_token, refresh_token, nil
 
 }
@@ -85,7 +92,7 @@ func GetUserByID(uid uint) (User, error) {
 
 	var u User
 
-	if err := DB.First(&u, uid).Error; err != nil {
+	if err := GetDB().First(&u, uid).Error; err != nil {
 		return u, errors.New("User not found!")
 	}
 
@@ -93,4 +100,29 @@ func GetUserByID(uid uint) (User, error) {
 
 	return u, nil
 
+}
+
+func RefreshToken(refreshToken string) (string, string, error) {
+	fmt.Println(refreshToken)
+	var ID, err = token.ExtractRefreshTokenID(refreshToken)
+	if err != nil {
+		return "", "", nil
+	}
+
+	ut := UserToken{}
+	err = GetDB().Model(UserToken{}).Where("user_id = ?", ID).Take(&ut).Error
+	if err != nil {
+		return "", "", nil
+	}
+	access_token, err := token.GenerateToken(ID)
+	refresh_token, err := token.GenerateRefreshToken(ID)
+
+	if err != nil {
+		return "", "", nil
+	}
+
+	newUT := UserToken{UserId: ID, Token: refresh_token}
+
+	newUT.SaveUserToken()
+	return access_token, refresh_token, nil
 }
