@@ -20,7 +20,7 @@ func main() {
 	models.Init()
 	r := gin.Default()
 
-	public := r.Group("/api")
+	public := r.Group("/api/auth")
 
 	public.POST("/register", authControllers.Register)
 	public.POST("/login", authControllers.Login)
