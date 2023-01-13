@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"html"
 	"strings"
 
@@ -103,26 +102,55 @@ func GetUserByID(uid uint) (User, error) {
 }
 
 func RefreshToken(refreshToken string) (string, string, error) {
-	fmt.Println(refreshToken)
+
 	var ID, err = token.ExtractRefreshTokenID(refreshToken)
 	if err != nil {
-		return "", "", nil
+		return "", "", err
 	}
 
 	ut := UserToken{}
-	err = GetDB().Model(UserToken{}).Where("user_id = ?", ID).Take(&ut).Error
+	err = GetDB().Model(UserToken{}).Where(map[string]interface{}{"user_id": ID, "deleted_at": nil, "token": refreshToken}).Take(&ut).Debug().Error
+
 	if err != nil {
-		return "", "", nil
+		return "", "", err
 	}
 	access_token, err := token.GenerateToken(ID)
 	refresh_token, err := token.GenerateRefreshToken(ID)
 
 	if err != nil {
-		return "", "", nil
+		return "", "", err
 	}
 
 	newUT := UserToken{UserId: ID, Token: refresh_token}
 
+	ut.SoftDeleteUserToken()
 	newUT.SaveUserToken()
 	return access_token, refresh_token, nil
+}
+
+func Logout(refreshToken string) error {
+
+	var ID, err = token.ExtractRefreshTokenID(refreshToken)
+	if err != nil {
+		return nil
+	}
+
+	ut := UserToken{}
+	err = GetDB().Model(UserToken{}).Where("user_id = ?", ID).Take(&ut).Error
+	if err != nil {
+		return err
+	}
+
+	ut.SoftDeleteUserToken()
+
+	return nil
+}
+
+func Block(userId int) error {
+	err := GetDB().Where("user_id = ?", userId).Delete(&UserToken{}).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

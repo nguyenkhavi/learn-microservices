@@ -28,7 +28,23 @@ POST http://localhost:8080/api/refresh-token HTTP/1.1
 content-type: application/json
 
 {
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NzYwMTQ1NjAsInVzZXJfaWQiOjE2fQ.VF29n-t-QHsY5pYSvpGuFqHh96ulDq7S5ZhZMjVNOcw"
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NzYxOTEyNTMsInVzZXJfaWQiOjE2fQ.m-mOEcBSNeADAMz0TSDK4d1I7I-O7bnXlQd9rLI8O2I"
+}
+###
+POST http://localhost:8080/api/logout HTTP/1.1
+content-type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NzYxOTA4MDYsInVzZXJfaWQiOjE2fQ.zVlR1PW8tPcUMmljG61zEJKTLIVPB6_fxh-J-LKu2gQ"
+}
+
+###
+
+POST http://localhost:8080/api/block HTTP/1.1
+content-type: application/json
+
+{
+    "userId": 16
 }
 ###
 GET http://localhost:8080/api/admin/user HTTP/1.1

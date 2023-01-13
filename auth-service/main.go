@@ -25,6 +25,8 @@ func main() {
 	public.POST("/register", authControllers.Register)
 	public.POST("/login", authControllers.Login)
 	public.POST("/refresh-token", authControllers.Refresh)
+	public.POST("/logout", authControllers.Logout)
+	public.POST("/block", authControllers.Block)
 
 	protected := r.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware())

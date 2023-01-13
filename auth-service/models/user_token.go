@@ -19,3 +19,13 @@ func (ut *UserToken) SaveUserToken() error {
 	}
 	return nil
 }
+
+func (ut *UserToken) SoftDeleteUserToken() error {
+
+	var err error
+	err = GetDB().Delete(&ut).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

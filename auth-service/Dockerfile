@@ -14,5 +14,7 @@ RUN CGO_ENABLED=0 go build -o /build/myapp .
 FROM scratch as production
 WORKDIR /
 COPY --from=builder /build/myapp .
+COPY --from=builder /build/.env .env
+
 EXPOSE 8080
 CMD ["./myapp"]
