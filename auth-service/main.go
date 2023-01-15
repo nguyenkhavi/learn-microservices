@@ -4,6 +4,7 @@ import (
 	"log"
 	"nkvi/auth-service/middlewares"
 	"nkvi/auth-service/models"
+	"os"
 
 	authControllers "nkvi/auth-service/src/auth"
 
@@ -32,6 +33,8 @@ func main() {
 	protected.Use(middlewares.JwtAuthMiddleware())
 	protected.GET("/user", authControllers.CurrentUser)
 
-	r.Run(":8080")
+	port := os.Getenv("PORT")
+
+	r.Run(":" + port)
 
 }

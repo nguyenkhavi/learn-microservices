@@ -1,0 +1,48 @@
+version: "3.9"
+services:
+  app:
+    build:
+      dockerfile: auth-service/Dockerfile
+      context: .
+      target: production
+    networks:
+      - be-net
+    env_file:
+      - auth-service/.env
+    depends_on:
+      - db
+  db:
+    image: postgres:14.1-alpine
+    networks:
+      - be-net
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes: 
+      - db:/var/lib/postgresql/data
+    # ports:
+    #   - 5432:5432
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.9
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - be-net
+    depends_on:
+      - app
+volumes:
+  db:
+    driver: local
+
+networks:
+  be-net:
+    driver: bridge
